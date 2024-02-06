@@ -118,6 +118,7 @@ task regenie_collapsing {
 	output {
 		File results = "~{out}.regenie"
 		File dict = "~{out}.regenie.Ydict"
+		File log = "~{out}.log"
 	}
 
 	runtime {
@@ -138,9 +139,10 @@ task merge_collapsing {
 	command <<<
 		awk 'NR == FNR {
 			pheno[$1]=$2
+			npheno++
 			next
 		}
-		FNR == 2 {
+		NR == npheno + 2 {
 			for (i in pheno)
 				gsub(i, pheno[i], $0)
 			print
