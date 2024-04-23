@@ -34,6 +34,7 @@ CATCOVARLIST=$7
 ANNOT='/Bulk/Exome sequences/Population level exome OQFE variants, PLINK format - final release/helper_files/ukb23158_500k_OQFE.annotations.txt.gz'
 SETLIST='/Bulk/Exome sequences/Population level exome OQFE variants, PLINK format - final release/helper_files/ukb23158_500k_OQFE.sets.txt.gz'
 EXCLUDE='/Bulk/Exome sequences/Population level exome OQFE variants, PLINK format - final release/helper_files/ukb23158_500k_OQFE.90pct10dp_qc_variants.txt'
+CHROMS=23
 
 PRED_LIST_FILE=dx://`dx ls --brief $PRED_LIST`
 PHENOFILE=dx://`dx ls --brief $PHENOPATH`
@@ -52,7 +53,7 @@ BEGIN {
 }
 
 END {
-    chroms = 23
+    chroms = '$CHROMS'
     for (i=1; i<=chroms; i++) {
         chr=(i < 23 ? i : "X")
         base="ukb23158_c"chr"_b0_v1"

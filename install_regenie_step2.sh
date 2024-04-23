@@ -11,15 +11,26 @@ PROJECT_DIR=$2
 OUTPUT_PREFIX=LF
 COVARCOLLIST="PC{1:10}"
 CATCOVARLIST=array
+GENOS='/WGS/chr22/ukb24310_c22_b99*'
 BASE=`dirname $0`
 EXTRA_OPTIONS=extraOptions.json
-INPUTS=inputs_ExWAS.json
-PHENO=pheno.txt
-COVAR=covar.txt
+INPUTS=inputs_regenie_step2.json
+PHENO=LF_pheno.txt
+COVAR=LF_covar.txt
 DXCOMPILER=/tmp/dxCompiler.jar
-WDL="ExWAS.wdl"
+WDL="regenie_step2.wdl"
 
-./make_ExWAS_inputs.sh ${PROJECT_DIR}/${PRED_LIST} ${PROJECT_DIR}/${PHENO} ${PROJECT_DIR}/${COVAR} "$COVARCOLLIST" "$CATCOVARLIST" $OUTPUT_PREFIX > $INPUTS &&
+./make_inputs_regenie_step2.R \
+    --project $PROJECT_ID \
+    --predList ${PROJECT_DIR}/${PRED_LIST} \
+    --pheno ${PROJECT_DIR}/${PHENO} \
+    --covar ${PROJECT_DIR}/${COVAR} \
+    --covarColList $COVARCOLLIST \
+    --catCovarList $CATCOVARLIST \
+    --qt \
+    --genos $GENOS \
+    --outputPrefix $OUTPUT_PREFIX \
+    --out $INPUTS &&
 
 [ -x $DXCOMPILER ] || wget https://github.com/dnanexus/dxCompiler/releases/download/2.11.4/dxCompiler-2.11.4.jar -O $DXCOMPILER &&
 

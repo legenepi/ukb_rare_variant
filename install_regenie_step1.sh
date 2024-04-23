@@ -7,13 +7,13 @@ fi
 
 PROJECT_ID=$1
 PROJECT_DIR=$2
-COVARCOLLIST=$3
-CATCOVARCOLIST=$4
+COVARCOLLIST="PC{1:10}"
+CATCOVARLIST=array
 BASE=`dirname $0`
 EXTRA_OPTIONS=extraOptions.json
-INPUTS=inputs_RAP.json
-PHENO=pheno.txt
-COVAR=covar.txt
+INPUTS=inputs_regenie_step1.json
+PHENO=LF_pheno.txt
+COVAR=LF_covar.txt
 DXCOMPILER=/tmp/dxCompiler.jar
 WDL="regenie_step1.wdl"
 
@@ -26,7 +26,14 @@ dx ls | grep -w $COVAR && dx rm $COVAR
 dx upload ${BASE}/$PHENO &&
 dx upload ${BASE}/$COVAR &&
 
-./make_regenie_step1_inputs.sh ${PROJECT_DIR}/${PHENO} ${PROJECT_DIR}/${COVAR} $COVARCOLLIST $CATCOVARLIST > $INPUTS &&
+./make_inputs_regenie_step1.R \
+    --project $PROJECT_ID\
+    --pheno ${PROJECT_DIR}/${PHENO} \
+    --covar ${PROJECT_DIR}/${COVAR} \
+    --covarColList $COVARCOLLIST \
+    --catCovarList $CATCOVARLIST \
+    --qt \
+    --out $INPUTS &&
 
 wget https://github.com/dnanexus/dxCompiler/releases/download/2.11.4/dxCompiler-2.11.4.jar -O $DXCOMPILER &&
 

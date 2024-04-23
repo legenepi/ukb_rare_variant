@@ -35,8 +35,14 @@ top_hits_specific <- top_hits %>%
   filter(!is.na(THRESH)) %>%
   arrange(P, THRESH) %>%
   group_by(GENE) %>%
-  slice(1) %>%
+  dplyr::slice(1) %>%
   ungroup %>%
   select(-ALLELE0, -ALLELE1, -EXTRA)
 
 write_tsv(top_hits_specific, "LF_collapsing_top_hits.tsv")
+
+V2G_out <- top_hits_specific %>%
+  mutate(signal="rs0") %>%
+  dplyr::select(signal, gene=GENE)
+
+write_tsv(V2G_out, "V2G_collapsing.txt")

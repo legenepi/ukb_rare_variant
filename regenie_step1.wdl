@@ -8,6 +8,7 @@ workflow regenie_step1 {
 		File? covar
 		String? covarColList
 		String? catCovarList
+		Boolean bt
 	}
 
 	scatter(geno in genos) {
@@ -44,7 +45,8 @@ workflow regenie_step1 {
 			covarColList = covarColList,
 			catCovarList = catCovarList,
 			qc_id = filter_snps.out_id,
-			qc_snplist = filter_snps.out_snplist
+			qc_snplist = filter_snps.out_snplist,
+			bt = bt
 	}
 
 	output {
@@ -156,6 +158,7 @@ task step1 {
 		File? qc_snplist
 		String? covarColList
 		String? catCovarList
+		Boolean bt
 	}
 
 	String out = "fit_qt_out"
@@ -175,7 +178,7 @@ task step1 {
 			--bsize 1000 \
 			--lowmem \
 			--lowmem-prefix . \
-			--qt \
+			~{true="--bt" false="--qt" bt} \
 			--use-relative-path \
 			--out "~{out}" \
 			--threads 8

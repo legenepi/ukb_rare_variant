@@ -1,6 +1,6 @@
 version 1.0
 
-workflow ExWAS {
+workflow regenie_step2 {
 
 	input {
 		String output_prefix
@@ -12,6 +12,7 @@ workflow ExWAS {
 		String? catCovarList
 		File pred_list
 		Array[File] loco
+		Boolean bt
 	}
 
   Array[Pair[String, Array[File]]] crossed = cross(models, genos)
@@ -28,7 +29,8 @@ workflow ExWAS {
 				covarColList = covarColList,
 				catCovarList = catCovarList,
 				pred_list = pred_list,
-				loco = loco
+				loco = loco,
+				bt = bt
 		}
 	}
 
@@ -59,6 +61,7 @@ task regenie_sv {
 		String? catCovarList
 		File pred_list
 		Array[File] loco
+		Boolean bt
 	}
 
 	String out = "~{basename(bed, '.bed')}_~{model}"
@@ -74,7 +77,7 @@ task regenie_sv {
 			~{"--catCovarList " + catCovarList} \
 			--phenoFile "~{pheno}" \
 			--pred "~{pred_list}" \
-			--qt \
+			~{true="--bt" false="--qt" bt} \
 			--bsize 400 \
 			--test "~{model}" \
 			--minMAC 3 \
