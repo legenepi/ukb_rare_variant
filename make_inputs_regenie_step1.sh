@@ -1,54 +1,29 @@
 #!/bin/bash
 
-. workflow_functions.sh
+. RAP.config
 
-while getopts "i:p:c:l:v:g:hb:" opt; do
-    case "${opt}" in
-        h)
-            usage
-            exit 0
-            ;;
-        g)
-            GENO_PATH=$OPTARG
-            ;;
-        i)
-            IFS=,
-            CHROMS=($OPTARG)
-            unset IFS
-            ;;
-        p)
-            PHENO=$OPTARG
-            ;;
-        c)
-            COVAR=$OPTARG
-            ;;
-        l)
-            COVARCOLLIST=$OPTARG
-            ;;
-        b)
-            CATCOVARLIST=$OPTARG
-            ;;
-    esac
+for i in ${ENTITIES// /.tsv }.tsv ${MINIMUM_DATA}.csv; do
+    if ! dx ls ${INPUTS}/$i > /dev/null; then
+        echo "Required input $i missing from ${INPUTS}, have you run extract_fields.sh?"
+        exit 1
+    fi
 done
 
-[ ${#CHROMS[@]} -gt 0 ] || CHROMS=({1..23})
+export $KEYS $OPTIONS
 
-cat <<EOT
-{
-    `get_genos regenie_step1.genos "/Bulk/Genotype Results/Genotype calls" ${CHROMS[@]}`,
-    `get_file regenie_step1.pheno "${PHENO}"`,
-EOT
-if [ -n "$COVARCOLLIST" ]; then
-    cat <<EOT
-    "regenie_step1.covarColList": "$COVARCOLLIST",
-EOT
-fi
-if [ -n "$CATCOVARLIST" ]; then
-    cat <<EOT
-    "regenie_step1.catCovarList": "$CATCOVARLIST",
-EOT
-fi
-cat <<EOT
-    `get_file regenie_step1.covar "${COVAR}"`
-}
-EOT
+Rscript - <<-RSCRIPT
+    suppressMessages(library(tidyverse))
+    suppressMessages(library(jsonlite))
+    source("R/make_inputs_functions.R")
+
+    minimum_data <- list(phenotype_generation.tab_data=map("$tab_data", get_file_id))
+    required_files <- get_config("$KEYS", "phenotype_generation") %>%
+        map(get_file_id)
+    options <- get_config("$OPTIONS", "phenotype_generation") %>%
+        map(~get_upload_id(., "$PROJECT_ID", "$PROJECT_DIR"))
+    c(minimum_data, required_files, options) %>%
+        write_json("${PHENOTYPES_GENERATED}.json", pretty=TRUE, auto_unbox=TRUE)
+RSCRIPT
+
+[ -s $DXCOMPILER ] || wget $DXCOMPILER_URL -O $DXCOMPILER
+java -jar $DXCOMPILER compile WDL/phenotype_generation.wdl -project $PROJECT_ID -compileMode IR -inputs ${PHENOTYPES_GENERATED}.json

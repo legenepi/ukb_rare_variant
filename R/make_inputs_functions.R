@@ -1,5 +1,12 @@
 require(tidyverse)
 
+get_config <- function(x, prefix=NULL) {
+    str_split_1(x, " ") %>%
+        Sys.getenv(., names=TRUE) %>%
+        set_names(~paste(prefix, ., sep=ifelse(is.null(prefix), "", "."))) %>%
+        discard(. == "")
+}
+
 get_file_id <- function(path, project) {
   paste0("ls -l --brief ", project, ":", path) %>%
     system2("dx", ., stdout=TRUE) %>%
@@ -29,4 +36,13 @@ get_loco <- function(predList, project) {
     loco <- scan(con, character())
     close(con)
     paste0("dx://", loco)
+}
+
+get_upload_id <- function(file, project, path) {
+    cmd <- paste0("ls '", project, ":", path, "/", file, "'")
+    if (system2("dx", cmd, stdout=FALSE, stderr=FALSE) == 0)
+        system2("dx", cmd %>% str_replace("ls", "rm -a"))
+    upload_cmd <- paste0("upload --brief --no-progress --destination '", project, ":", path, "/' '", file, "'")
+    system2("dx", upload_cmd, stdout=TRUE) %>%
+        paste0("dx://", .)
 }
