@@ -2,28 +2,19 @@
 
 . RAP.config
 
-for i in ${ENTITIES// /.tsv }.tsv ${MINIMUM_DATA}.csv; do
-    if ! dx ls ${INPUTS}/$i > /dev/null; then
-        echo "Required input $i missing from ${INPUTS}, have you run extract_fields.sh?"
-        exit 1
-    fi
-done
-
-export $KEYS $OPTIONS
-
 Rscript - <<-RSCRIPT
     suppressMessages(library(tidyverse))
     suppressMessages(library(jsonlite))
     source("R/make_inputs_functions.R")
 
-    minimum_data <- list(phenotype_generation.tab_data=map("$tab_data", get_file_id))
-    required_files <- get_config("$KEYS", "phenotype_generation") %>%
-        map(get_file_id)
-    options <- get_config("$OPTIONS", "phenotype_generation") %>%
-        map(~get_upload_id(., "$PROJECT_ID", "$PROJECT_DIR"))
-    c(minimum_data, required_files, options) %>%
-        write_json("${PHENOTYPES_GENERATED}.json", pretty=TRUE, auto_unbox=TRUE)
+    list(regenie_step1.genos = get_genos("$GENO_BASE", "$PROJECT_ID"),
+         regenie_step1.pheno = get_upload_id("$pheno", "$PROJECT_ID", "$PROJECT_DIR"),
+         regenie_step1.covar = get_upload_id("$covar", "$PROJECT_ID", "$PROJECT_DIR"),
+         regenie_step1.covarColList = "$covarColList",
+         regenie_step1.catCovarList = "$catCovarList",
+         regenie_step1.bt = "$bt" == "bt") %>%
+      write_json("${ANALYSIS}_step1_inputs.json", pretty=TRUE, auto_unbox=TRUE)
 RSCRIPT
 
 [ -s $DXCOMPILER ] || wget $DXCOMPILER_URL -O $DXCOMPILER
-java -jar $DXCOMPILER compile WDL/phenotype_generation.wdl -project $PROJECT_ID -compileMode IR -inputs ${PHENOTYPES_GENERATED}.json
+java -jar $DXCOMPILER compile WDL/regenie_step1.wdl -project $PROJECT_ID -compileMode IR -inputs ${ANALYSIS}_step1_inputs.json
