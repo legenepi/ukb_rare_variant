@@ -95,7 +95,7 @@ task merge_genos {
 		Array[File] fams
 	}
 
-	String out = "ukb_LF_cal_v2"
+	String out = "ukb_cal_v2"
 
 	command <<<
 		cat "~{write_lines(beds)}" | sed -e 's/.bed//g' > merge_list.txt
@@ -161,7 +161,7 @@ task step1 {
 		Boolean bt
 	}
 
-	String out = "fit_qt_out"
+	String out = "fit_step1_out"
 
 	command <<<
 		bed_path="~{bed}"

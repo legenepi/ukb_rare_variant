@@ -1,6 +1,6 @@
 version 1.0
 
-workflow regenie_step2 {
+workflow regenie_step2_SV {
 
 	input {
 		String output_prefix
@@ -8,6 +8,7 @@ workflow regenie_step2 {
 		Array[String] models = ["additive", "dominant", "recessive"]
 		File pheno
 		File? covar
+		File? exclude
 		String? covarColList
 		String? catCovarList
 		File pred_list
@@ -26,6 +27,7 @@ workflow regenie_step2 {
 				fam = p.right[2],
 				pheno = pheno,
 				covar = covar,
+				exclude = exclude,
 				covarColList = covarColList,
 				catCovarList = catCovarList,
 				pred_list = pred_list,
@@ -57,6 +59,7 @@ task regenie_sv {
 		File fam
 		File pheno
 		File? covar
+		File? exclude
 		String? covarColList
 		String? catCovarList
 		File pred_list
@@ -72,6 +75,7 @@ task regenie_sv {
 		regenie \
 			--step 2 \
 			--bed "${bed_path%.bed}" \
+			~{"--exclude " + exclude } \
 			~{"--covarFile " + covar} \
 			~{"--covarColList " + covarColList} \
 			~{"--catCovarList " + catCovarList} \

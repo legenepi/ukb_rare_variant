@@ -2,6 +2,13 @@
 
 . RAP.config
 
+if ! WORKFLOW=`dx ls --brief ${PROJECT_DIR}/regenie_step1`; then
+    echo "Workflow assocition_testing not found in ${PROJECT_DIR} on RAP, have you run install_workflows.sh?"
+    exit 1
+fi
+
+dx mkdir -p $RESULTS
+
 Rscript - <<-RSCRIPT
     suppressMessages(library(tidyverse))
     suppressMessages(library(jsonlite))
@@ -17,4 +24,6 @@ Rscript - <<-RSCRIPT
 RSCRIPT
 
 [ -s $DXCOMPILER ] || wget $DXCOMPILER_URL -O $DXCOMPILER
-java -jar $DXCOMPILER compile WDL/regenie_step1.wdl -project $PROJECT_ID -compileMode IR -inputs ${ANALYSIS}_step1_inputs.json
+
+java -jar $DXCOMPILER compile WDL/regenie_step1.wdl -project $PROJECT_ID -compileMode IR -inputs ${ANALYSIS}_step1_inputs.json &&
+dx run --destination $RESULTS --brief -y -f ${ANALYSIS}_step1_inputs.dx.json $WORKFLOW

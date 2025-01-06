@@ -8,7 +8,7 @@ get_config <- function(x, prefix=NULL) {
 }
 
 get_file_id <- function(path, project) {
-  paste0("ls -l --brief ", project, ":", path) %>%
+  paste0("ls -l --brief '", project, ":", path, "'") %>%
     system2("dx", ., stdout=TRUE) %>%
     paste0("dx://", .)
 }
@@ -29,9 +29,9 @@ get_genos <- function(base, project) {
     matrix(ncol = 3, byrow = TRUE)
 }
 
-get_loco <- function(predList, project) {
-    cmd <- paste0("dx cat ", project, ":", predList,
-                  " | cut -f 2 -d ' ' | while read f; do dx ls --brief $f; done")
+get_loco <- function(predList, results_dir) {
+    cmd <- paste0("dx cat ", predList,
+                  " | awk '{ print \"", results_dir, "/\"$2 }' | while read f; do dx ls --brief $f; done")
     con <- pipe(cmd)
     loco <- scan(con, character())
     close(con)
