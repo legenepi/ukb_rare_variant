@@ -1,9 +1,22 @@
-# ukb_rare_variant
-Rare variant analysis on UKB RAP
+# UK Biobank rare variant association testing pipeline
+This pipeline runs single variant and gene-based collapsing analyses on the UK Biobank RAP
 
-1. *update_docker.sh* - creates a docker image from Dockerfile and creates extraOptions.json pointing to the docker image on the RAP for the workflow installation below
-2. *install_XXX.sh scripts* - creates the required input .json files for each .wdl workflow (calls *make_XXX_inputs.sh*) and installs the workflow on the RAP 
-3. Once the workflow is installed and you get a workflow ID returned from step 2, run the workflow as:
-```   
-    dx run -f inputs_XXX.dx.json <workflow id>
-```
+## Prerequisites
+* A UK Biobank RAP project
+* DNAnexus [dx toolkit](https://documentation.dnanexus.com/downloads)
+* R with tidyverse and jsonlite packages
+
+## Set up and running association tests
+1. Edit *options.config* to define:
+    - Your RAP project ID (`dx find projects`).
+    - The path on the RAP to install the workflow to.
+    - The output path on the RAP for results
+    - The regenie format [phenotype](https://rgcgithub.github.io/regenie/options/#phenotype-file-format) and [covariate](https://rgcgithub.github.io/regenie/options/#covariate-file-format) files to upload.
+    - Covariate specifications.
+2. Run `install_workflows.sh` to install the WDL workflows to the RAP.
+    - The first time *install_workflows.sh* is run it will create and upload the docker image to use that has regenie and plink2 installed.
+3. Run `run_regenie_step1.sh` to run regenie step 1.
+    - Log in to the RAP web interface to check this completes before proceeding.
+5. Run `run_regenie_step2_SV.sh` to run single variant testing with the UK Biobank WES data.
+6. Run `run_regenie_step2_collapsing.sh` to run gene-based collapsing analysis with the UK Biobank WES data.
+7. When the association testing has run, download the results from the RAP output path you specified using `dx download`
