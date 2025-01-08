@@ -14,7 +14,7 @@ This pipeline runs single variant and gene-based collapsing analyses on the UK B
     - The regenie format [phenotype](https://rgcgithub.github.io/regenie/options/#phenotype-file-format) and [covariate](https://rgcgithub.github.io/regenie/options/#covariate-file-format) files to upload.
     - Covariate specifications.
 2. Run `install_workflows.sh` to install the WDL workflows to the RAP.
-    - The first time *install_workflows.sh* is run it will create and upload the docker image to use that has regenie and plink2 installed.
+    - The first time `install_workflows.sh` is run it will create and upload the docker image to use that has regenie and plink2 installed.
 3. Run `run_regenie_step1.sh` to run regenie step 1.
     - Log in to the RAP web interface to check this completes before proceeding.
 5. Run `run_regenie_step2_SV.sh` to run single variant testing with the UK Biobank WES data.
