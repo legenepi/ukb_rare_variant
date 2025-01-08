@@ -2,8 +2,10 @@
 
 . RAP.config
 
-if ! WORKFLOW=`dx ls --brief ${PROJECT_DIR}/regenie_step1`; then
-    echo "Workflow assocition_testing not found in ${PROJECT_DIR} on RAP, have you run install_workflows.sh?"
+dx cd ${PROJECT_DIR}
+
+if ! WORKFLOW=`dx ls --brief regenie_step1`; then
+    echo "Workflow regenie_step1 not found in ${PROJECT_DIR} on RAP, have you run install_workflows.sh?"
     exit 1
 fi
 
@@ -14,9 +16,9 @@ Rscript - <<-RSCRIPT
     suppressMessages(library(jsonlite))
     source("R/make_inputs_functions.R")
 
-    list(regenie_step1.genos = get_genos("$GENO_BASE", "$PROJECT_ID"),
-         regenie_step1.pheno = get_upload_id("$pheno", "$PROJECT_ID", "$PROJECT_DIR"),
-         regenie_step1.covar = get_upload_id("$covar", "$PROJECT_ID", "$PROJECT_DIR"),
+    list(regenie_step1.genos = get_genos("$GENO_BASE"),
+         regenie_step1.pheno = get_upload_id("$pheno", "$PROJECT_DIR"),
+         regenie_step1.covar = get_upload_id("$covar", "$PROJECT_DIR"),
          regenie_step1.covarColList = "$covarColList",
          regenie_step1.catCovarList = "$catCovarList",
          regenie_step1.bt = "$bt" == "bt") %>%

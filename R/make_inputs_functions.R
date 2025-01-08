@@ -7,22 +7,26 @@ get_config <- function(x, prefix=NULL) {
         discard(. == "")
 }
 
-get_file_id <- function(path, project) {
-  paste0("ls -l --brief '", project, ":", path, "'") %>%
+get_file_id <- function(path) {
+  paste0("ls -l --brief '", path, "'") %>%
     system2("dx", ., stdout=TRUE) %>%
     paste0("dx://", .)
 }
 
-get_genos <- function(base, project) {
-  data.table::fread(cmd=paste0("dx ls -l '", project, ":", base, "'"),
-                    header = FALSE) %>%
+get_genos <- function(base, extract="", chroms=c(1:22, "X", "Y")) {
+    if (extract != "") 
+        chroms <- scan(extract, character()) %>%
+            str_remove(":.+") %>%
+            unique
+
+    data.table::fread(cmd=paste0("dx ls -l '", base, "'"), header = FALSE) %>%
     as_tibble %>%
     select(filename=V6, dx=V7) %>%
     separate(filename, c("id", "chr", "b0", "v2", "ext")) %>%
     mutate(dx=str_replace(dx, "^\\(", "dx://") %>% str_remove("\\)$"),
            ext=factor(ext, levels=c("bed", "bim", "fam")),
            chr=str_remove(chr, "c")) %>%
-    filter(chr %in% 1:22) %>%
+    filter(chr %in% chroms) %>%
     mutate(chr=chr %>% as.integer) %>%
     arrange(chr, ext) %>%
     pull(dx) %>%
@@ -38,11 +42,11 @@ get_loco <- function(predList, results_dir) {
     paste0("dx://", loco)
 }
 
-get_upload_id <- function(file, project, path) {
-    cmd <- paste0("ls '", project, ":", path, "/", file, "'")
+get_upload_id <- function(file, path) {
+    cmd <- paste0("ls '", path, "/", file, "'")
     if (system2("dx", cmd, stdout=FALSE, stderr=FALSE) == 0)
         system2("dx", cmd %>% str_replace("ls", "rm -a"))
-    upload_cmd <- paste0("upload --brief --no-progress --destination '", project, ":", path, "/' '", file, "'")
+    upload_cmd <- paste0("upload --brief --no-progress --destination '", path, "/' '", file, "'")
     system2("dx", upload_cmd, stdout=TRUE) %>%
         paste0("dx://", .)
 }

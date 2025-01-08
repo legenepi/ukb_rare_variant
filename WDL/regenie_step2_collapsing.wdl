@@ -1,26 +1,32 @@
 version 1.0
 
-workflow regenie_step2_SV {
+workflow regenie_step2_collapsing {
 
 	input {
 		String output_prefix
 		Array[Array[File]] genos
-		Array[String] models = ["additive", "dominant", "recessive"]
+		Array[String] models = ["max"]
 		File pheno
 		File? covar
 		File? exclude
-		File? extract
 		String? covarColList
 		String? catCovarList
 		File pred_list
 		Array[File] loco
 		Boolean bt
+		File annot
+		File setlist
+		File mask
+		Array[Float] aaf_bins = [0.01,0.001,0.0001,0.00001]
+		String joint_tests = "acat,sbat"
+		Float maxaff = 0.01
+		String tests = "acatv,skato"
 	}
 
-  Array[Pair[String, Array[File]]] crossed = cross(models, genos)
-  
-  scatter (p in crossed) {
-		call regenie_sv {
+	Array[Pair[String, Array[File]]] crossed = cross(models, genos)
+	
+	scatter (p in crossed) {
+		call regenie_collapsing {
 			input:
 				model = p.left,
 				bed = p.right[0],
@@ -29,32 +35,38 @@ workflow regenie_step2_SV {
 				pheno = pheno,
 				covar = covar,
 				exclude = exclude,
-				extract = extract,
 				covarColList = covarColList,
 				catCovarList = catCovarList,
 				pred_list = pred_list,
 				loco = loco,
-				bt = bt
+				bt = bt,
+				annot = annot,
+				setlist = setlist,
+				mask = mask,
+				aaf_bins = aaf_bins,
+				joint_tests = joint_tests,
+				maxaff = maxaff,
+				tests = tests
 		}
 	}
 
 	scatter (m in models) {
-		call merge_sv {
+		call merge_collapsing {
 			input:
 				prefix = output_prefix,
 				model = m,
-				results = regenie_sv.results,
-				dict = regenie_sv.dict
+				results = regenie_collapsing.results,
+				dict = regenie_collapsing.dict
 		}
 	}
 
 	output {
-		Array[File] sv_results = merge_sv.merged
-		Array[File] sv_dict = merge_sv.dict_out
+		Array[File] collapsing_results = merge_collapsing.merged
+		Array[File] collapsing_dict = merge_collapsing.dict_out
 	}
 }
 
-task regenie_sv {
+task regenie_collapsing {
 
 	input {
 		String model
@@ -64,12 +76,18 @@ task regenie_sv {
 		File pheno
 		File? covar
 		File? exclude
-		File? extract
 		String? covarColList
 		String? catCovarList
 		File pred_list
 		Array[File] loco
 		Boolean bt
+		File annot
+		File setlist
+		File mask
+		Array[Float] aaf_bins
+		String joint_tests
+		Float maxaff
+		String tests
 	}
 
 	String out = "~{basename(bed, '.bed')}_~{model}"
@@ -81,16 +99,23 @@ task regenie_sv {
 			--step 2 \
 			--bed "${bed_path%.bed}" \
 			~{"--exclude " + exclude } \
-			~{"--extract " + extract } \
 			~{"--covarFile " + covar} \
 			~{"--covarColList " + covarColList} \
 			~{"--catCovarList " + catCovarList} \
 			--phenoFile "~{pheno}" \
 			--pred "~{pred_list}" \
 			~{true="--bt" false="--qt" bt} \
-			--bsize 400 \
-			--test "~{model}" \
-			--minMAC 3 \
+			--bsize 200 \
+			--anno-file "~{annot}" \
+			--set-list "~{setlist}" \
+			--mask-def "~{mask}" \
+			--build-mask "~{model}" \
+			--nauto 23 \
+			--aaf-bins "~{sep=',' aaf_bins}" \
+			--joint "~{joint_tests}" \
+			--vc-maxAAF "~{maxaff}" \
+			--vc-tests "~{tests}" \
+			--rgc-gene-p \
 			--threads=16 \
 			--no-split \
 			--out "~{out}"
@@ -106,7 +131,7 @@ task regenie_sv {
 	}
 }
 
-task merge_sv {
+task merge_collapsing {
 
 	input {
 		String prefix
@@ -115,7 +140,7 @@ task merge_sv {
 		Array[File] dict
 	}
 
-	String out = "~{prefix}_sv_~{model}.regenie.gz"
+	String out = "~{prefix}_collapsing_~{model}.regenie.gz"
 	String Ydict = sub(out, "gz", "Ydict")
 
 	command <<<
