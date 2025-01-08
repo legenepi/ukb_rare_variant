@@ -16,16 +16,17 @@ Rscript - <<-RSCRIPT
     suppressMessages(library(jsonlite))
     source("R/make_inputs_functions.R")
 
-    list(regenie_step1.genos = get_genos("$GENO_BASE"),
+    list(regenie_step1.genos = get_genos("$GENO_BASE", chroms=1:22),
          regenie_step1.pheno = get_upload_id("$pheno", "$PROJECT_DIR"),
          regenie_step1.covar = get_upload_id("$covar", "$PROJECT_DIR"),
          regenie_step1.covarColList = "$covarColList",
          regenie_step1.catCovarList = "$catCovarList",
-         regenie_step1.bt = "$bt" == "bt") %>%
-      write_json("${ANALYSIS}_step1_inputs.json", pretty=TRUE, auto_unbox=TRUE)
+         regenie_step1.bt = "$bt" == "bt",
+         regenie_step1.output_prefix = "$output_prefix") %>%
+      write_json("${output_prefix}_step1_inputs.json", pretty=TRUE, auto_unbox=TRUE)
 RSCRIPT
 
 [ -s $DXCOMPILER ] || wget $DXCOMPILER_URL -O $DXCOMPILER
 
-java -jar $DXCOMPILER compile WDL/regenie_step1.wdl -project $PROJECT_ID -compileMode IR -inputs ${ANALYSIS}_step1_inputs.json &&
-dx run --destination $RESULTS --brief -y -f ${ANALYSIS}_step1_inputs.dx.json $WORKFLOW
+java -jar $DXCOMPILER compile WDL/regenie_step1.wdl -project $PROJECT_ID -compileMode IR -inputs ${output_prefix}_step1_inputs.json &&
+dx run --destination $RESULTS --brief -y -f ${output_prefix}_step1_inputs.dx.json $WORKFLOW

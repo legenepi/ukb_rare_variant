@@ -62,7 +62,6 @@ workflow regenie_step2_collapsing {
 
 	output {
 		Array[File] collapsing_results = merge_collapsing.merged
-		Array[File] collapsing_dict = merge_collapsing.dict_out
 	}
 }
 
@@ -141,16 +140,23 @@ task merge_collapsing {
 	}
 
 	String out = "~{prefix}_collapsing_~{model}.regenie.gz"
-	String Ydict = sub(out, "gz", "Ydict")
 
 	command <<<
-		awk 'NR == 1 || FNR > 1' `echo "~{sep=' ' results}" | grep -o "[^ ]*~{model}[^ ]*"` | gzip > ~{out}
-		cp `echo "~{sep=' ' dict}" | grep -o "[^ ]*~{model}[^ ]*" | head -1` ~{Ydict}
+		awk 'NR == FNR {
+			pheno[$1]=$2
+			npheno++
+			next
+		}
+		NR == npheno + 2 {
+			for (i in pheno)
+				gsub(i, pheno[i], $0)
+			print
+		}
+		FNR > 2 { print }' "~{dict[0]}" `echo "~{sep=' ' results}" | grep -o "[^ ]*~{model}[^ ]*"` | gzip > ~{out}
 	>>>
 	
 	output {
 		File merged = out
-		File dict_out = Ydict
 	}
 
 	runtime {

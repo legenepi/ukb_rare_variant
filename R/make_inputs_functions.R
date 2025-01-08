@@ -15,7 +15,7 @@ get_file_id <- function(path) {
 
 get_genos <- function(base, extract="", chroms=c(1:22, "X", "Y")) {
     if (extract != "") 
-        chroms <- scan(extract, character()) %>%
+        chroms <- scan(extract, character(), quiet=TRUE) %>%
             str_remove(":.+") %>%
             unique
 
@@ -37,9 +37,10 @@ get_loco <- function(predList, results_dir) {
     cmd <- paste0("dx cat ", predList,
                   " | awk '{ print \"", results_dir, "/\"$2 }' | while read f; do dx ls --brief $f; done")
     con <- pipe(cmd)
-    loco <- scan(con, character())
+    loco <- scan(con, character(), quiet=TRUE)
     close(con)
-    paste0("dx://", loco)
+    paste0("dx://", loco) %>%
+        as.list
 }
 
 get_upload_id <- function(file, path) {

@@ -9,7 +9,7 @@ if ! WORKFLOW=`dx ls --brief regenie_step2_SV`; then
     exit 1
 fi
 
-if ! PRED_LIST="`dx ls --brief ${RESULTS}/fit_step1_pred.list`"; then
+if ! PRED_LIST="`dx ls --brief ${RESULTS}/${output_prefix}_step1_pred.list`"; then
     echo "Step 1 predictions not found in ${RESULTS} on RAP, have you run step1?"
     exit 2
 fi

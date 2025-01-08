@@ -3,6 +3,7 @@ version 1.0
 workflow regenie_step1 {
 
 	input {
+		String output_prefix
 		Array[Array[File]] genos
 		File pheno
 		File? covar
@@ -46,7 +47,8 @@ workflow regenie_step1 {
 			catCovarList = catCovarList,
 			qc_id = filter_snps.out_id,
 			qc_snplist = filter_snps.out_snplist,
-			bt = bt
+			bt = bt,
+			prefix = output_prefix
 	}
 
 	output {
@@ -159,9 +161,10 @@ task step1 {
 		String? covarColList
 		String? catCovarList
 		Boolean bt
+		String prefix
 	}
 
-	String out = "fit_step1_out"
+	String out = "~{prefix}_step1"
 
 	command <<<
 		bed_path="~{bed}"

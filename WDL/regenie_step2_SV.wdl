@@ -50,7 +50,6 @@ workflow regenie_step2_SV {
 
 	output {
 		Array[File] sv_results = merge_sv.merged
-		Array[File] sv_dict = merge_sv.dict_out
 	}
 }
 
@@ -116,16 +115,23 @@ task merge_sv {
 	}
 
 	String out = "~{prefix}_sv_~{model}.regenie.gz"
-	String Ydict = sub(out, "gz", "Ydict")
 
 	command <<<
-		awk 'NR == 1 || FNR > 1' `echo "~{sep=' ' results}" | grep -o "[^ ]*~{model}[^ ]*"` | gzip > ~{out}
-		cp `echo "~{sep=' ' dict}" | grep -o "[^ ]*~{model}[^ ]*" | head -1` ~{Ydict}
+		awk 'NR == FNR {
+			pheno[$1]=$2
+			npheno++
+			next
+		}
+		NR == npheno + 1 {
+			for (i in pheno)
+				gsub(i, pheno[i], $0)
+			print
+		}
+		FNR > 2 { print }' "~{dict[0]}" `echo "~{sep=' ' results}" | grep -o "[^ ]*~{model}[^ ]*"` | gzip > ~{out}
 	>>>
 	
 	output {
 		File merged = out
-		File dict_out = Ydict
 	}
 
 	runtime {
