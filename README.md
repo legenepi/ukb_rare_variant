@@ -7,7 +7,7 @@ This pipeline runs single variant and gene-based collapsing analyses on the UK B
 * R with tidyverse and jsonlite packages
 
 ## Set up and running association tests
-1. Edit *options.config* to define:
+1. Edit `options.config` to define:
     - Your RAP project ID (`dx find projects`).
     - The path on the RAP to install the workflow to.
     - The output path on the RAP for results
