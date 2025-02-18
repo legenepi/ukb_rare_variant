@@ -143,8 +143,8 @@ task filter_snps {
 	}
 
 	runtime {
-		cpu: 2
-		memory: "16 GB"
+		cpu: 8
+		memory: "64 GB"
 	}
 }
 
