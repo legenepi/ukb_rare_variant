@@ -1,5 +1,7 @@
 require(tidyverse)
 
+CHROMS <- c(1:22, "X", "Y")
+
 get_config <- function(x, prefix=NULL) {
     str_split_1(x, " ") %>%
         Sys.getenv(., names=TRUE) %>%
@@ -13,12 +15,16 @@ get_file_id <- function(path) {
     paste0("dx://", .)
 }
 
-get_genos <- function(base, extract="", chroms=c(1:22, "X", "Y")) {
-    if (extract != "") 
+get_genos <- function(base, extract="", chroms="") {
+    if (extract != "") { 
         chroms <- scan(extract, character(), quiet=TRUE) %>%
             str_remove(":.+") %>%
             unique
-
+    } else if (chroms != "") {
+        chroms <- str_split_1(chroms, " ")
+    } else {
+        chroms <- CHROMS
+    }
     data.table::fread(cmd=paste0("dx ls -l '", base, "'"), header = FALSE) %>%
     as_tibble %>%
     select(filename=V6, dx=V7) %>%
@@ -27,7 +33,7 @@ get_genos <- function(base, extract="", chroms=c(1:22, "X", "Y")) {
            ext=factor(ext, levels=c("bed", "bim", "fam")),
            chr=str_remove(chr, "c")) %>%
     filter(chr %in% chroms) %>%
-    mutate(chr=chr %>% as.integer) %>%
+    mutate(chr=factor(chr, levels=CHROMS)) %>%
     arrange(chr, ext) %>%
     pull(dx) %>%
     matrix(ncol = 3, byrow = TRUE)
