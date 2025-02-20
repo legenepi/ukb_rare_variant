@@ -20,7 +20,7 @@ get_genos <- function(base, extract="", chroms="") {
         chroms <- scan(extract, character(), quiet=TRUE) %>%
             str_remove(":.+") %>%
             unique
-    } else if (chroms != "") {
+    } else if (!missing(chroms) && chroms != "") {
         chroms <- str_split_1(chroms, " ")
     } else {
         chroms <- CHROMS
