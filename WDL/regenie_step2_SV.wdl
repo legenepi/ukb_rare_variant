@@ -91,6 +91,7 @@ task regenie_sv {
 			--test "~{model}" \
 			--minMAC 3 \
 			--threads=16 \
+			--nauto 23 \
 			--no-split \
 			--out "~{out}"
 	>>>
