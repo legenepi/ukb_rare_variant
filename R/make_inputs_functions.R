@@ -1,6 +1,6 @@
 require(tidyverse)
 
-CHROMS <- c(1:22, "X", "Y")
+CHROMS <- c(1:22)
 
 get_config <- function(x, prefix=NULL) {
     str_split_1(x, " ") %>%
