@@ -21,7 +21,7 @@ Rscript - <<-RSCRIPT
     suppressMessages(library(jsonlite))
     source("R/make_inputs_functions.R")
 
-    params <- list(regenie_step2_SV.genos = get_genos("$EXOME_PATH", "$extract"),
+    params <- list(regenie_step2_SV.genos = get_genos("$EXOME_PATH", "$extract", "$chroms"),
         regenie_step2_SV.pred_list = get_file_id("${PRED_LIST}"),
         regenie_step2_SV.loco = get_loco("${PRED_LIST}", "${RESULTS}"),
         regenie_step2_SV.bt = "$bt" == "true",

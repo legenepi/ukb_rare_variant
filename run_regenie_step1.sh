@@ -16,7 +16,7 @@ Rscript - <<-RSCRIPT
     suppressMessages(library(jsonlite))
     source("R/make_inputs_functions.R")
 
-    list(regenie_step1.genos = get_genos("$GENO_BASE"),
+    list(regenie_step1.genos = get_genos("$GENO_BASE", chroms=as.character(1:22)),
          regenie_step1.pheno = get_upload_id("$pheno", "$PROJECT_DIR"),
          regenie_step1.covar = get_upload_id("$covar", "$PROJECT_DIR"),
          regenie_step1.covarColList = "$covarColList",
