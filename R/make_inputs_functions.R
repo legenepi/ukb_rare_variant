@@ -1,6 +1,10 @@
 require(tidyverse)
 
+<<<<<<< HEAD
 CHROMS <- c(1:22)
+=======
+CHROMS <- c(1:22, "X")
+>>>>>>> ae5dff50a225cc89b7c5562b61da4c094198e65d
 
 get_config <- function(x, prefix=NULL) {
     str_split_1(x, " ") %>%
@@ -20,7 +24,7 @@ get_genos <- function(base, extract="", chroms="") {
         chroms <- scan(extract, character(), quiet=TRUE) %>%
             str_remove(":.+") %>%
             unique
-    } else if (chroms != "") {
+    } else if (!missing(chroms) && chroms != "") {
         chroms <- str_split_1(chroms, " ")
     } else {
         chroms <- CHROMS
